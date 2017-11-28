@@ -1,0 +1,128 @@
+{% block title %}{% endblock %}
+{% block head %}
+<style>
+    @import url("https://fonts.googleapis.com/css?family=Lato");
+
+    * {
+        margin: 0;
+        padding: 0;
+        @include box-sizing(border-box);
+    }
+    body {
+        background-color: #0c4a8d;
+        font-family: Lato, Arial;
+        color: #fff;
+        padding: 55px 25px;
+        background-color: $background;
+    }
+    h1 {
+        font-weight: normal;
+        font-size: 40px;
+        font-weight: normal;
+        text-transform: uppercase;
+        span {
+            font-size: 13px;
+            display: block;
+            padding-left: 4px;
+        }
+    }
+
+    .custom-file-upload-hidden {
+        display: none;
+        visibility: hidden;
+        position: absolute;
+        left: -9999px;
+    }
+    .custom-file-upload {
+        display: block;
+        width: auto;
+        font-size: 16px;
+        margin-top: 30px;
+        //border: 1px solid #ccc;
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    }
+
+    .file-upload-wrapper {
+        position: relative;
+        margin-bottom: 5px;
+        //border: 1px solid #ccc;
+    }
+
+    .file-upload-input {
+        width: 500px;
+        color: #fff;
+        font-size: 15px;
+        padding: 11px 17px;
+        border: none;
+        background-color: #333438;
+        float: left;
+    }
+
+    .file-upload-button {
+        cursor: pointer;
+        display: inline-block;
+        color: #fff;
+        font-size: 16px;
+        text-transform: uppercase;
+        padding: 11px 20px;
+        border: none;
+        margin-left: 3px;
+        background-color: #333438;
+        float: left;
+
+    }
+
+    .common {
+        font-family: sans-serif;
+        padding: 2px;
+        margin : 2px;
+        border-radius: 4px;
+     }
+    .fileList {
+        background: #229;
+        color: white;
+    }
+    #userButton {
+        background: #999;
+        color: #000;
+        width: 8em;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #userButton:hover {
+       background : #4A4;
+       color : white;
+    }
+</style>
+{% endblock %}
+
+
+<body>
+{% block body %}
+    <h1>Can Network Traffic File Analysis</h1>
+    <span>With Python, jQuery and JS</span><br><br><br>
+    <pre style="font-size:20px";}>       Input your CAN Traffic data (*About Absolute PATH!!)</pre>
+
+    <div class="custom-file-upload">
+        <form action={{ url_for('index') }} method="POST">
+            <input type="text" name="path" class="file-upload-input" placeholder="ex) /Users/Mac/Desktop/Data Analysis Challenge/CAN_Dataset.txt">
+            <input type="submit" class="file-upload-button" value="Analysis">
+            <br>
+        </form>
+    </div>
+
+
+
+
+
+
+
+    <br><br><br><br>
+
+
+{% endblock %}
+</body>

@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block head %}
+
+<style>
+    #chartDraw {
+        height: 300px;
+        margin : 3px;
+        width : 300px;
+        display : inline-block;
+        background-color: skyblue;
+    }
+
+    #chartForm {
+        margin-right: auto;
+        margin-left: auto;
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%;
+    }
+
+    .line {
+        fill: none;
+        stroke: #000;
+        stroke-width: 1.5px;
+    }
+
+    body {
+        background-color: #1f2428;
+    }
+</style>
+
+
+<script>
+    var plot;
+    var chartData = [[0,0]];
+    var table;
+
+    $(document).ready(function(){
+        init();
+        renderChart();
+        render();
+    })
+
+
+    //Tabledata init
+    function init() {
+        table = $('#example').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+            order: [[1, 'Timestamp']],
+            "deferRender": true,
+            destory:true,
+            colReorder: {
+                realtime: false
+                },
+            columns: [
+                {"data": "No"},
+                {"data": "Timestamp"},
+                {"data": "ID"},
+                {"data": "RTR"},
+                {"data": "DLC"},
+                {"data": "Offset"},
+                {"data": "Detect"}
+            ]
+        }
+    );
+
+    tableDos = $('#example2').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+            order: [[1, 'Timestamp']],
+            "deferRender": true,
+            destory:true,
+            colReorder: {
+                realtime: false
+                },
+            columns: [
+                {"data": "No"},
+                {"data": "Timestamp"},
+                {"data": "ID"},
+                {"data": "RTR"},
+                {"data": "DLC"},
+                {"data": "Offset"},
+                {"data": "Detect"}
+            ]
+        }
+    );
+
+    tableFuzzy = $('#example3').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+            order: [[1, 'Timestamp']],
+            "deferRender": true,
+            destory:true,
+            colReorder: {
+                realtime: false
+                },
+            columns: [
+                {"data": "No"},
+                {"data": "Timestamp"},
+                {"data": "ID"},
+                {"data": "RTR"},
+                {"data": "DLC"},
+                {"data": "Offset"},
+                {"data": "Detect"}
+            ]
+        }
+    );
+  }
+
+
+    function renderChart() {
+        plot = $.jqplot('chart', [chartData], {
+            title: 'CAN Network Traffic',
+            axes: {
+            xaxis: {
+                    tickOptions: {
+                        showLabel: true,                 // x 축 표시
+                        showGridline: false              // 데이터 별 세로라인 draw, 데이터 많아지면 세로라인때문에 제거
+                 },
+                tickInterval:'1 minutes'                 // X축 간격 띄우는 주기
+                }
+            }
+          , series: [{
+             color: '#5FAB78'
+          }]
+          , highlighter: {                              // X축이 뭔지는 알아야 되니깐 마우스 오버 기능을 활용하기 위해 추가함
+              show: true,
+              sizeAdjust: 7.5
+          }
+          , cursor: {
+              show: false
+          }
+      });
+  }
+
+    //idx, packetPerCount draw
+    function getChartData(idx, packetPerSecond) {
+        chartData.push([idx,packetPerSecond]);
+        plot = $.jqplot('chart', [chartData], {
+               title: 'CAN Network Traffic'
+               , axes: {
+                   xaxis: {
+                       tickOptions: {
+                            min: 0,
+                            showLabel: true,
+                            showGridline: false
+                      }
+                      , tickInterval: '1 minutes'
+                   },
+
+                   yaxis: {
+                        min : 0
+                   }
+               },
+               seriesDefaults: {
+                    rendererOptions: { smooth: true}
+                }
+               , series: [{
+                    color: '#5FAB78'
+               }]
+               , highlighter:{
+                    show: true,
+                    sizeAdjust: 20
+               }
+               , cursor: {
+                    show: true
+               }
+             }).replot();                               // 다시 그릴 땐 replot을 활용
+          }
+
+
+    function render(){
+        $.ajax({
+            url: "{{ config.server }}/{{ session_id }}/render",
+            type: "GET",
+            dataType: "json",
+            error : function(){
+            alert('error');
+        },
+
+        success: function(data){
+            idxCheck();
+            },
+        });
+    }
+
+
+    function get_idx(){
+        var idxNum = 0;
+        $.ajax({
+            url: "{{ config.server }}/{{ session_id }}/status",
+            type: "GET",
+            async: false,
+            dataType: "json",
+            error : function(){
+                alert('error');
+            },
+
+            success: function(data){
+                idxNum = data.msg*1;
+            },
+        });
+        return idxNum;
+    }
+
+    function get_data(idx){
+        var req_data = {"idx": idx};
+        var msg_data = "";
+        $.ajax({
+            url: "{{ config.server }}/{{ session_id }}/output",
+            type: "POST",
+            dataType: "json",
+            async: false,
+            data: req_data,
+            error : function(){
+                alert('error');
+            },
+
+        success: function(data){
+            msg_data = data;
+            }
+        });
+        return msg_data;
+    }
+
+    var l = [];
+    var packetPerSecond = 0;
+
+    function idxCheck(data){
+        var idxNum = 0;
+        var prvidxNum = 0;
+        var cntNum = 0;
+        var arrList = "";
+
+        timer = setInterval( function() {
+        idxNum = get_idx();
+        if (cntNum <= idxNum){
+            arrList = get_data(cntNum);
+            drawTable(arrList);
+
+            // about count 1/s packet
+            l.push(Object.keys(arrList.msg).length);
+
+            packetPerSecond = l.pop();
+            getChartData(cntNum, packetPerSecond);
+            cntNum += 1;
+        }
+
+      else{
+          clearInterval(timer);
+        }
+    },900);
+    }
+
+    //draw table
+    var cnt = 0
+    var tableCount = 0
+    function drawTable(data){
+        var textToInsert = '';
+        var tabledata = [];
+        var tableDosdata = [];
+        var tableFuzzydata = [];
+
+        $.each(data.msg, function(count, item) {
+                cnt += 1
+                tabledata.push({
+                                "No":cnt,
+                                "Timestamp":item['Timestamp'],
+                                "ID":item['ID'],
+                                "RTR":item['RTR'],
+                                "DLC":item['DLC'],
+                                "Offset":item['Offset'],
+                                "Detect":item['Detect'],
+                                });
+
+                if (item['Detect'] == 'Dos'){
+                    tableDosdata.push({
+                                "No":cnt,
+                                "Timestamp":item['Timestamp'],
+                                "ID":item['ID'],
+                                "RTR":item['RTR'],
+                                "DLC":item['DLC'],
+                                "Offset":item['Offset'],
+                                "Detect":item['Detect'],
+                                });
+                }
+
+                if (item['Detect'] == 'Fuzzy'){
+                    tableFuzzydata.push({
+                                "No":cnt,
+                                "Timestamp":item['Timestamp'],
+                                "ID":item['ID'],
+                                "RTR":item['RTR'],
+                                "DLC":item['DLC'],
+                                "Offset":item['Offset'],
+                                "Detect":item['Detect'],
+                                });
+                }
+            });
+
+            //append table row
+            table.rows.add(tabledata).draw();
+            tableDos.rows.add(tableDosdata).draw();
+            tableFuzzy.rows.add(tableFuzzydata).draw();
+            tableCount += 1;
+
+            // table row delete
+            if ( tableCount%10 == 0 ){
+                table.clear().draw();
+                tableCount = 0;
+            }
+
+      //scroll move bottom
+      $("#packetList").scrollTop($("#packetList")[0].scrollHeight);
+    }
+</script>
+{% endblock %}
+
+
+
+
+{% block body %}
+<body>
+    <!-- DEBUG Code
+    <div>
+        <h3>{{ session_id }}</h3>
+        <h4>{{ file_path }}</h4>
+    </div>
+    -->
+
+    <!-- highchart Graph Traffic -->
+    <br><br>
+    <div id="division" style="background-color: #33383c; padding: 10px 10px 10px 10px; margin:5px 5px 5px 5px">
+        <h1 style="color:white">Realtime Traffic Monitoring (1 min)</h1>
+        <br>
+        <div class="container-fluid">
+            <!-- Example row of columns -->
+            <div class="row">
+                <div class="container-fluid" id="data-container" height="20%"></div>
+            </div>
+        </div>
+    </div>
+    <br><br><br><br>
+
+    <!--jqplot graph-->
+    <div id="division" style="background-color: #33383c; padding: 10px 10px 10px 10px; margin:5px 5px 5px 5px">
+        <h1 style="color:white">Realtime Traffic Monitoring (All)</h1>
+        <br>
+        <div id="chart" style="color:white"></div>
+    </div>
+    <br><br><br><br>
+
+
+
+    <!-- Table Ajax -->
+    <div id="division" style="background-color: #33383c; padding: 10px 10px 10px 10px; margin:5px 5px 5px 5px">
+    <h1 style="color:white">[Packet traffic list] CAN Packet traffic real time</h1>
+    <br>
+    <div class="fixed-table-container" style="background-color: white;">
+        <div class="header-bg"></div>
+            <div class="table-wrapper" id='packetList'>
+            <br>
+            <table id="example" class="table table-striped table-bordered dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th><div class="th-text">No.</div></th>
+                        <th><div class="th-text">TimeStamp</div></th>
+                        <th><div class="th-text">ID</div></th>
+                        <th><div class="th-text">RTR</div></th>
+                        <th><div class="th-text">DLC</div></th>
+                        <th><div class="th-text">Offset</div></th>
+                        <th><div class="th-text">Detect</div></th>
+                    </tr>
+                </thead>
+                <tbody id='packetFrame'> </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Three Chart -->
+    <br><br><br><br>
+    <div id='chartForm'>
+        <div id="division" style="background-color: #33383c; padding: 10px 10px 10px 10px; margin:5px 5px 5px 5px">
+            <h1 style="color:white">[Percentage of Packets by Attack Type] Attack type count real time</h1>
+            <br>
+            <div id='chartDraw1'>
+                <div id="container" style="height: 400px; width: 500"></div>
+            </div>
+        </div>
+        <br><br>
+
+        <div id="division" style="background-color: #33383c; padding: 10px 10px 10px 10px; margin:5px 5px 5px 5px">
+            <h1 style="color:white">[Dos Attack Detection List]</h1>
+            <br>
+            <div id='chartDraw2' style="background-color: white;">
+                <br>
+                <table id="example2" class="table table-striped table-bordered dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th><div class="th-text2">No.</div></th>
+                            <th><div class="th-text2">TimeStamp</div></th>
+                            <th><div class="th-text2">ID</div></th>
+                            <th><div class="th-text2">RTR</div></th>
+                            <th><div class="th-text2">DLC</div></th>
+                            <th><div class="th-text2">Offset</div></th>
+                            <th><div class="th-text2">Detect</div></th>
+                        </tr>
+                    </thead>
+                    <tbody id='packetFrameDos'> </tbody>
+                </table>
+            </div>
+        </div>
+        <br><br>
+
+        <div id="division" style="background-color: #33383c; padding: 10px 10px 10px 10px; margin:5px 5px 5px 5px">
+            <h1 style="color:white">[Fuzzy Attack Detection List]</h1>
+            <br>
+            <div id='chartDraw3' style="background-color: white;">
+                <br>
+                <table id="example3" class="table table-striped table-bordered dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th><div class="th-text3">No.</div></th>
+                            <th><div class="th-text3">TimeStamp</div></th>
+                            <th><div class="th-text3">ID</div></th>
+                            <th><div class="th-text3">RTR</div></th>
+                            <th><div class="th-text3">DLC</div></th>
+                            <th><div class="th-text3">Offset</div></th>
+                            <th><div class="th-text3">Detect</div></th>
+                        </tr>
+                    </thead>
+                    <tbody id='packetFrameFuzzy'> </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+
+    <script src="/static/js/highcharts.js"></script>
+    <script src="/static/js/circleDraw.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/1.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.4.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.4.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.4.2/js/buttons.print.min.js"></script>
+</body>
+{% endblock %}
