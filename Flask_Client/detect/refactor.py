@@ -86,7 +86,7 @@ class detectCan():
                     attack_type = 'Normal'
                 else:
                     temp_interval = time_stamp - previous_dict[can_id]
-                    if temp_interval < white_data[can_id]['avg'] + white_data[can_id]['bound'] and temp_interval > white_data[can_id]['avg'] - white_data[can_id]['bound']:
+                    if temp_interval > white_data[can_id]['avg']*0.6:
                         attack_type = 'Normal'
                     previous_dict[can_id] = time_stamp
 
