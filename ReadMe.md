@@ -2,7 +2,7 @@
 
 This tool is a tool for submitting to the "2017 CISC Data Challenge (http://challenge.cisc.or.kr)". It is a tool for determining the type of attack for a given CAN traffic data and visualizing it in real time.
 
-이 도구는 "2017 CISC 데이터 챌린지 (http://challenge.cisc.or.kr)"에 제출하기 위한 도구입니다. 주어진 CAN 트래픽 데이터에 대한 공격 유형을 결정하고, 이를 실시간으로 시각화 합니다.
+이 도구는 "2017 CISC 데이터 챌린지 (http://challenge.cisc.or.kr )"에 제출하기 위한 도구입니다. 주어진 CAN 트래픽 데이터에 대한 공격 유형을 결정하고, 이를 실시간으로 시각화 합니다.
 
 
 ## Getting Started
