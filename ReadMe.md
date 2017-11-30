@@ -96,11 +96,12 @@ This tool is a tool written in Python, no separate compilation is required. If y
 
   - Run Flask-client app.py
   [clientRun!](https://i.imgur.com/2IzRan7.png)
+  ![clientRun](/img/clientRun.png)
 
 
   - Run Flask-server app.py
   [serverRun!](https://i.imgur.com/2tN3B1j.png)
-
+  ![serverRun](/img/serverRun.png
 
 ## Testing environment
   - Recommended specification
@@ -120,16 +121,22 @@ This tool is a tool written in Python, no separate compilation is required. If y
 
 1. Access to http://localhost:5096. And input your CAN traffic dataset file's absolute path. (like example)
   [initpage!](https://i.imgur.com/zXaXwGl.png)
+  ![initpage](/img/initpage.png)
 
 
 2. Click the "ANALYSIS" button
 
 
 3. Now you can then see the analysis results and visualization information for the dataset as shown below.
-  [View1!](https://i.imgur.com/PIjbMWz.png)
-  [View2!](https://i.imgur.com/CoNmJrQ.png)
-  [View3!](https://i.imgur.com/sJ84udD.png)
 
+  [View1!](https://i.imgur.com/PIjbMWz.png)
+  ![View1](/img/View1.png)
+  
+  [View2!](https://i.imgur.com/CoNmJrQ.png)
+  ![View2](/img/View2.png)
+  
+  [View3!](https://i.imgur.com/sJ84udD.png)
+  ![View3](/img/View3.png)
 
 ## Finished..
 If you have any questions, or if there are any areas that need to be corrected, please contact us at "jsh05042@gmail.com".
