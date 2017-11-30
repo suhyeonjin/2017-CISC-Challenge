@@ -101,7 +101,7 @@ This tool is a tool written in Python, no separate compilation is required. If y
 
   - Run Flask-server app.py
   [serverRun!](https://i.imgur.com/2tN3B1j.png)
-  ![serverRun](/img/serverRun.png
+  ![serverRun](/img/serverRun.png)
 
 ## Testing environment
   - Recommended specification
